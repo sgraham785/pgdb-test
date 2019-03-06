@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eli-pgdb-test
+spec:
+  selector:
+    matchLabels:
+      name: eli-pgdb-test
+      part-of: eli
+      tier: test
+  template:
+    metadata:
+      labels:
+        name: eli-pgdb-test
+        part-of: eli
+        tier: test
+    spec:
+      containers:
+        - name: eli-pgdb-test
+          image: 872941275684.dkr.ecr.us-east-1.amazonaws.com/eli-pgdb-test:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9000
+              name: https
+          resources:
+            limits:
+              cpu: 0.5
+              memory: 256Mi
+            requests:
+              cpu: 0.5
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eli-pgdb-test
+  namespace: acceptance
+  labels:
+    name: eli-pgdb-test
+    part-of: eli
+    tier: server
+spec:
+  type: NodePort
+  ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+      name: https
+  selector:
+    name: eli-pgdb-test
+    part-of: eli
+    tier: test
